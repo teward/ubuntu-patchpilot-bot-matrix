@@ -1,0 +1,10 @@
+home_domain: "HOMESERVER_DOMAIN_HERE"  # if the base domain after your user is example.com use that
+device_id: "patchpilot-bot"  # Specifies the device ID to the Matrix server
+store_path: "./store"  # This should be left like this, used to store sync DB
+command_prefix: "@"  # This can be a single prefix or a list or string prefixes
+case_insensitive: True  # this will allow for case-insensitive command testing/matching
+owners:  # List of matrix IDs of users considered "owners"
+  - "YOURMATRIXID"
+ignore_self: True   # Set to True to ignore messages to the bot itself
+process_message_edits: False
+global_message_type: "m.text"  # Alternative other type: m.notice

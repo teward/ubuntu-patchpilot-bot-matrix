@@ -1,0 +1,4 @@
+matrix-nio
+nio-bot
+pyyaml
+requests

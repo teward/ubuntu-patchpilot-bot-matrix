@@ -245,3 +245,4 @@ cython_debug/
 # Bot specifics
 .matrix_credentials.yaml
 config.yaml
+store/

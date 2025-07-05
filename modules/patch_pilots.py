@@ -120,7 +120,7 @@ class PatchPilotCommands(niobot.Module):
         self.pilots = []
 
         if patch_pilots_index == -1:
-            return
+            pass
         else:
             split_room_topic[patch_pilots_index] = "Patch Pilots: (none, consider a @pilot in!)"
             try:

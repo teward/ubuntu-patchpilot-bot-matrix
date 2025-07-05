@@ -78,7 +78,8 @@ async def on_ready(sync_result: niobot.SyncResponse):
            f"Device: {bot.device_id}\n"
            f"Auto-joining rooms: \n - ")
     if bot.rooms.keys():
-        msg += f"{"\n - ".join(bot.rooms.keys())}"
+        roomstr = '\n - '.join(bot.rooms.keys())
+        msg += f"{roomstr}"
     else:
         msg += "(None)"
     logger.info(msg)

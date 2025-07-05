@@ -1,4 +1,4 @@
-from pdb import find_function
+import traceback
 
 import niobot
 
@@ -37,6 +37,15 @@ class PatchPilotCommands(niobot.Module):
 
     @niobot.command(description="Allows a patch pilot to show themselves as in or out")
     async def pilot(self, ctx: niobot.Context, action: str):
+        room_topic = str(ctx.room.topic)
+        split_room_topic = room_topic.split("\n")
+        patch_pilots_index = -1
+        for i in range(len(split_room_topic) - 1):
+            if split_room_topic[i].startswith("Patch Pilots: "):
+                patch_pilots_index = i
+                break
+
+
         # if ctx.message.sender in self.members:
         if action.lower() not in ["in", "out"]:
             await self.bot.add_reaction(ctx.room, ctx.message,
@@ -47,12 +56,52 @@ class PatchPilotCommands(niobot.Module):
                 await self.write()
                 await self.bot.add_reaction(ctx.room, ctx.message,
                                             ReactionEmojis.CHECK_MARK.value)
+
+                if patch_pilots_index == -1:
+                    await self.bot.add_reaction(ctx.room, ctx.message, ReactionEmojis.BOOM.value)
+                    return
+                else:
+                    pilots = ""
+                    if len(self.pilots) == 0:
+                        split_room_topic[patch_pilots_index] = "Patch Pilots: (none, consider a @pilot in!)"
+                    else:
+                        for pilot in self.pilots:
+                            pilots += f"`{pilot}`, "
+                        split_room_topic[patch_pilots_index] = "Patch Pilots: " + pilots.rstrip(', ')
+
+                try:
+                    await self.bot.update_room_topic(ctx.room.room_id, "\n".join(split_room_topic))
+                except Exception as e:
+                    traceback.print_exception(e)
+                    await self.bot.add_reaction(ctx.room, ctx.message, ReactionEmojis.BOOM.value)
+
             if action.lower() == "out":
                 if ctx.message.sender in self.pilots:
                     self.pilots.remove(ctx.message.sender)
                     await self.write()
+
                 await self.bot.add_reaction(ctx.room, ctx.message,
                                             ReactionEmojis.CHECK_MARK.value)
+
+                if patch_pilots_index == -1:
+                    await self.bot.add_reaction(ctx.room, ctx.message, ReactionEmojis.BOOM.value)
+                    return
+                else:
+                    pilots = ""
+                    if len(self.pilots) == 0:
+                        split_room_topic[patch_pilots_index] = "Patch Pilots: (none, consider a @pilot in!)"
+                    else:
+                        for pilot in self.pilots:
+                            pilots += f"`{pilot}`, "
+                        split_room_topic[patch_pilots_index] = "Patch Pilots: " + pilots.rstrip(', ')
+
+                try:
+                    await self.bot.update_room_topic(ctx.room.room_id, "\n".join(split_room_topic))
+                except Exception as e:
+                    traceback.print_exception(e)
+                    await self.bot.add_reaction(ctx.room, ctx.message, ReactionEmojis.BOOM.value)
+
+
 
     @niobot.command(description="Allows the bot owner to reset the state of the"
                                 "active patch pilots list to empty. Also triggers a refresh of "
@@ -60,7 +109,25 @@ class PatchPilotCommands(niobot.Module):
                     hidden=True)
     @is_owner()
     async def reset_pilots(self, ctx: niobot.Context):
+        room_topic = str(ctx.room.topic)
+        split_room_topic = room_topic.split("\n")
+        patch_pilots_index = -1
+        for i in range(len(split_room_topic) - 1):
+            if split_room_topic[i].startswith("Patch Pilots: "):
+                patch_pilots_index = i
+                break
+
         self.pilots = []
+
+        if patch_pilots_index == -1:
+            return
+        else:
+            split_room_topic[patch_pilots_index] = "Patch Pilots: (none, consider a @pilot in!)"
+            try:
+                await self.bot.update_room_topic(ctx.room.room_id, "\n".join(split_room_topic))
+            except Exception as e:
+                traceback.print_exception(e)
+
         await self.write()
         # self.load_authorized()
         await self.bot.add_reaction(ctx.room, ctx.message, ReactionEmojis.BOOM.value)

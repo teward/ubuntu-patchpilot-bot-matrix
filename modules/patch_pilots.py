@@ -92,7 +92,7 @@ class PatchPilotCommands(niobot.Module):
                         split_room_topic[patch_pilots_index] = "Patch Pilots: (none, consider a @pilot in!)"
                     else:
                         for pilot in self.pilots:
-                            pilots += f"`{pilot}`, "
+                            pilots += f"{pilot}, "
                         split_room_topic[patch_pilots_index] = "Patch Pilots: " + pilots.rstrip(', ')
 
                 try:

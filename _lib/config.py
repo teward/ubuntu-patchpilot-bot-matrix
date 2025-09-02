@@ -10,13 +10,3 @@ def get_bot_config() -> dict:
 
 def get_owners() -> list:
     return get_bot_config()['owners']
-
-
-def get_authorized(additionals: list = None) -> list:
-    auth = []
-    auth.extend(get_owners())
-    auth.extend(get_bot_config()['authorized'])
-    if additionals:
-        auth.extend(additionals)
-
-    return auth

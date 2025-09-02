@@ -57,3 +57,13 @@ class AdminCommands(niobot.Module):
                 if room_id != ctx.room.room_id:
                     await self.bot.add_reaction(ctx.room, ctx.message,
                                                 ReactionEmojis.CHECK_MARK.value)
+
+    @niobot.command(description="(Owner Only) Blacklist a user from using the bot.", hidden=True)
+    @is_owner()
+    async def blacklist_user(self, ctx: niobot.Context, user: str):
+        if not user:
+            await self.bot.add_reaction(ctx.room, ctx.message, ReactionEmojis.QUESTION_MARK.value)
+
+        else:
+            self.blacklist_user.append(user)
+            await self.bot.add_reaction(ctx.room, ctx.message, ReactionEmojis.CHECK_MARK.value)

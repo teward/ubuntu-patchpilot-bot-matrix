@@ -246,3 +246,4 @@ cython_debug/
 .matrix_credentials.yaml
 config.yaml
 store/
+user_blacklist

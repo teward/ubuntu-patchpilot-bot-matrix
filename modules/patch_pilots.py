@@ -4,7 +4,7 @@ import niobot
 
 import requests
 
-from _lib.config import get_authorized
+# from _lib.config import get_authorized
 from _lib.decorators import is_owner, is_authorized
 from _lib.enums import ReactionEmojis
 
@@ -14,11 +14,19 @@ class PatchPilotCommands(niobot.Module):
         super().__init__(bot)
         self.pilots = []
         # self.members = []
+        self.blacklist = []
         try:
             with open('store/pilots.txt', mode='r') as f:
                 self.pilots.extend(f.readlines())
         except FileNotFoundError:
             f = open('store/pilots.txt', mode='w')
+            f.close()
+
+        try:
+            with open('store/user_blacklist', mode='r') as f:
+                self.blacklist.extend(f.readlines())
+        except FileNotFoundError:
+            f = open('store/user_blacklist', mode='w')
             f.close()
 
         # self.load_authorized()
@@ -34,6 +42,8 @@ class PatchPilotCommands(niobot.Module):
     async def write(self) -> None:
         with open('store/pilots.txt', mode='w') as f:
             f.writelines([f"{pilot}\n" for pilot in self.pilots])
+        with open('store/user_blacklist', mode='w') as f:
+            f.writelines([f"{user}\n" for user in self.blacklist])
 
     @niobot.command(description="Allows a patch pilot to show themselves as in or out")
     async def pilot(self, ctx: niobot.Context, action: str):
@@ -46,7 +56,10 @@ class PatchPilotCommands(niobot.Module):
                 break
 
 
-        # if ctx.message.sender in self.members:
+        if ctx.message.sender in self.blacklist:
+            await self.bot.add_reaction(ctx.room, ctx.message, ReactionEmojis.CROSS_MARK.value)
+            return
+
         if action.lower() not in ["in", "out"]:
             await self.bot.add_reaction(ctx.room, ctx.message,
                                         ReactionEmojis.QUESTION_MARK.value)
@@ -62,18 +75,18 @@ class PatchPilotCommands(niobot.Module):
                     return
                 else:
                     pilots = ""
-                    if len(self.pilots) == 0:
-                        split_room_topic[patch_pilots_index] = "Patch Pilots: (none, consider a @pilot in!)"
-                    else:
-                        for pilot in self.pilots:
-                            pilots += f"{pilot}, "
-                        split_room_topic[patch_pilots_index] = "Patch Pilots: " + pilots.rstrip(', ')
-
-                try:
-                    await self.bot.update_room_topic(ctx.room.room_id, "\n".join(split_room_topic))
-                except Exception as e:
-                    traceback.print_exception(e)
-                    await self.bot.add_reaction(ctx.room, ctx.message, ReactionEmojis.BOOM.value)
+                #     if len(self.pilots) == 0:
+                #         split_room_topic[patch_pilots_index] = "Patch Pilots: (none, consider a @pilot in!)"
+                #     else:
+                #         for pilot in self.pilots:
+                #             pilots += f"{pilot}, "
+                #         split_room_topic[patch_pilots_index] = "Patch Pilots: " + pilots.rstrip(', ')
+                #
+                # try:
+                #     await self.bot.update_room_topic(ctx.room.room_id, "\n".join(split_room_topic))
+                # except Exception as e:
+                #     traceback.print_exception(e)
+                #     await self.bot.add_reaction(ctx.room, ctx.message, ReactionEmojis.BOOM.value)
 
             if action.lower() == "out":
                 if ctx.message.sender in self.pilots:
@@ -88,18 +101,18 @@ class PatchPilotCommands(niobot.Module):
                     return
                 else:
                     pilots = ""
-                    if len(self.pilots) == 0:
-                        split_room_topic[patch_pilots_index] = "Patch Pilots: (none, consider a @pilot in!)"
-                    else:
-                        for pilot in self.pilots:
-                            pilots += f"{pilot}, "
-                        split_room_topic[patch_pilots_index] = "Patch Pilots: " + pilots.rstrip(', ')
+                    # if len(self.pilots) == 0:
+                    #     split_room_topic[patch_pilots_index] = "Patch Pilots: (none, consider a @pilot in!)"
+                    # else:
+                    #     for pilot in self.pilots:
+                    #         pilots += f"{pilot}, "
+                    #     split_room_topic[patch_pilots_index] = "Patch Pilots: " + pilots.rstrip(', ')
 
-                try:
-                    await self.bot.update_room_topic(ctx.room.room_id, "\n".join(split_room_topic))
-                except Exception as e:
-                    traceback.print_exception(e)
-                    await self.bot.add_reaction(ctx.room, ctx.message, ReactionEmojis.BOOM.value)
+                # try:
+                #     await self.bot.update_room_topic(ctx.room.room_id, "\n".join(split_room_topic))
+                # except Exception as e:
+                #     traceback.print_exception(e)
+                #     await self.bot.add_reaction(ctx.room, ctx.message, ReactionEmojis.BOOM.value)
 
 
 

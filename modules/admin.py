@@ -1,6 +1,6 @@
 import niobot
 
-from _lib.decorators import is_owner, is_authorized
+from _lib.decorators import is_owner
 from _lib.enums import ReactionEmojis
 from _lib.matrix import resolve_room
 

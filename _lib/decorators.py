@@ -1,5 +1,5 @@
 from typing import Any
-from _lib.config import get_owners, get_authorized
+from _lib.config import get_owners #, get_authorized
 import niobot
 
 
@@ -24,14 +24,14 @@ def is_owner() -> Any:
     return niobot.check(predicate)
 
 
-def is_authorized(additional_ids: list = None) -> Any:
-    """
-    This decorator is an extension of `is_owner` in that we specifically only let a set of
-    people actually run any command - hence "authorized" users - defined in the conf
-    """
-
-    def predicate(ctx: niobot.Context):
-        authorized = get_authorized(additional_ids)
-        return ctx.message.sender in authorized
-
-    return niobot.check(predicate)
+# def is_authorized(additional_ids: list = None) -> Any:
+#     """
+#     This decorator is an extension of `is_owner` in that we specifically only let a set of
+#     people actually run any command - hence "authorized" users - defined in the conf
+#     """
+#
+#     def predicate(ctx: niobot.Context):
+#         authorized = get_authorized(additional_ids)
+#         return ctx.message.sender in authorized
+#
+#     return niobot.check(predicate)

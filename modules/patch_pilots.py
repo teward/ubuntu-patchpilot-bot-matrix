@@ -55,7 +55,8 @@ class PatchPilotCommands(niobot.Module):
                 break
 
 
-        if ctx.message.sender in self.blacklist:
+        if (ctx.message.sender in self.blacklist or not ctx.message.sender.endswith(":ubuntu.com")
+                or not ctx.message.sender.endswith(":darkchaos.dev")):
             await self.bot.add_reaction(ctx.room, ctx.message, ReactionEmojis.CROSS_MARK.value)
             return
 

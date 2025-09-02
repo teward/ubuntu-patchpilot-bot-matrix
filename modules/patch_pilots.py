@@ -4,8 +4,7 @@ import niobot
 
 import requests
 
-# from _lib.config import get_authorized
-from _lib.decorators import is_owner, is_authorized
+from _lib.decorators import is_owner
 from _lib.enums import ReactionEmojis
 
 

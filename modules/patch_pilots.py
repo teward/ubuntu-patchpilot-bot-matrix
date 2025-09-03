@@ -14,8 +14,6 @@ class PatchPilotCommands(niobot.Module):
         self.pilots = []
         # self.members = []
         self.blacklist = []
-        self.whitelist = []
-
         try:
             with open('store/pilots.txt', mode='r') as f:
                 self.pilots.extend(f.readlines())
@@ -28,13 +26,6 @@ class PatchPilotCommands(niobot.Module):
                 self.blacklist.extend(f.readlines())
         except FileNotFoundError:
             f = open('store/user_blacklist', mode='w')
-            f.close()
-
-        try:
-            with open('store/user_whitelist', mode='r') as f:
-                self.whitelist.extend(f.readlines())
-        except FileNotFoundError:
-            f = open('store/user_whitelist', mode='w')
             f.close()
 
         # self.load_authorized()
@@ -52,56 +43,6 @@ class PatchPilotCommands(niobot.Module):
             f.writelines([f"{pilot}\n" for pilot in self.pilots])
         with open('store/user_blacklist', mode='w') as f:
             f.writelines([f"{user}\n" for user in self.blacklist])
-        with open('store/user_whitelist', mode='w') as f:
-            f.writelines([f"{user}\n" for user in self.whitelist])
-
-    @niobot.command(description="Adds a user to the blacklist.", hidden=True)
-    @is_owner()
-    async def blacklist(self, ctx: niobot.Context, user: str):
-        if user in self.blacklist:
-            await self.bot.add_reaction(ctx.room, ctx.message, ReactionEmojis.CHECK_MARK.value)
-        else:
-            self.blacklist.append(user)
-            await self.write()
-            await self.bot.add_reaction(ctx.room, ctx.message, ReactionEmojis.CHECK_MARK.value)
-
-        return
-
-    @niobot.command(description="Removes a user from the blacklist.", hidden=True)
-    @is_owner()
-    async def unblacklist(self, ctx: niobot.Context, user: str):
-        if user in self.blacklist:
-            self.blacklist.remove(user)
-            await self.write()
-            await self.bot.add_reaction(ctx.room, ctx.message, ReactionEmojis.CHECK_MARK.value)
-        else:
-            await self.bot.add_reaction(ctx.room, ctx.message, ReactionEmojis.CHECK_MARK.value)
-
-        return
-
-    @niobot.command(description="Adds a user to the whitelist.", hidden=True)
-    @is_owner()
-    async def whitelist(self, ctx: niobot.Context, user: str):
-        if user in self.whitelist:
-            await self.bot.add_reaction(ctx.room, ctx.message, ReactionEmojis.CHECK_MARK.value)
-        else:
-            self.whitelist.append(user)
-            await self.write()
-            await self.bot.add_reaction(ctx.room, ctx.message, ReactionEmojis.CHECK_MARK.value)
-
-        return
-
-    @niobot.command(description="Removes a user from the whitelist.", hidden=True)
-    @is_owner()
-    async def unwhitelist(self, ctx: niobot.Context, user: str):
-        if user in self.whitelist:
-            self.whitelist.remove(user)
-            await self.write()
-            await self.bot.add_reaction(ctx.room, ctx.message, ReactionEmojis.CHECK_MARK.value)
-        else:
-            await self.bot.add_reaction(ctx.room, ctx.message, ReactionEmojis.CHECK_MARK.value)
-
-        return
 
     @niobot.command(description="Allows a patch pilot to show themselves as in or out")
     async def pilot(self, ctx: niobot.Context, action: str):
@@ -114,10 +55,7 @@ class PatchPilotCommands(niobot.Module):
                 break
 
 
-
-        if (ctx.message.sender in self.whitelist):
-            pass
-        elif (ctx.message.sender in self.blacklist or not ctx.message.sender.endswith(":ubuntu.com")
+        if (ctx.message.sender in self.blacklist or not ctx.message.sender.endswith(":ubuntu.com")
                 or not ctx.message.sender.endswith(":darkchaos.dev")):
             await self.bot.add_reaction(ctx.room, ctx.message, ReactionEmojis.CROSS_MARK.value)
             return

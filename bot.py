@@ -17,7 +17,7 @@ from _lib.enums import ReactionEmojis
 # ================================================
 
 logger = initialize_logger()
-logging.basicConfig(filename="debug.log", level=logging.DEBUG, encoding="utf-8",
+logging.basicConfig(filename="debug.log", level=logging.INFO, encoding="utf-8",
                     errors="backslashreplace")
 
 # Load base credentials and matrix information

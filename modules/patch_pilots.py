@@ -54,12 +54,14 @@ class PatchPilotCommands(niobot.Module):
                 patch_pilots_index = i
                 break
 
-
-        if (ctx.message.sender in self.blacklist or not ctx.message.sender.endswith(":ubuntu.com")
-                or not ctx.message.sender.endswith(":darkchaos.dev")
-                or not ctx.message.sender.endswith(":matrix.debian.social")):
+        if ctx.message.sender.strip('@') in self.blacklist:
             await self.bot.add_reaction(ctx.room, ctx.message, ReactionEmojis.CROSS_MARK.value)
             return
+
+        # if ctx.message.sender.split(":")[1].lower() not in ['ubuntu.com', 'darkchaos.dev', 'matrix.debian.social']:
+        #     self.bot.log.info("COMMAND 'PILOT' CALLED BY DISALLOWED USER!")
+        #     await self.bot.add_reaction(ctx.room, ctx.message, ReactionEmojis.CROSS_MARK.value)
+        #     return
 
         if action.lower() not in ["in", "out"]:
             await self.bot.add_reaction(ctx.room, ctx.message,

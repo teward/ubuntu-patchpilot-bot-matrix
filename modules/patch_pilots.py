@@ -54,7 +54,7 @@ class PatchPilotCommands(niobot.Module):
                 patch_pilots_index = i
                 break
 
-        if ctx.message.sender.strip('@') in self.blacklist:
+        if ctx.message.sender in self.blacklist:
             await self.bot.add_reaction(ctx.room, ctx.message, ReactionEmojis.CROSS_MARK.value)
             return
 

@@ -48,11 +48,11 @@ class PatchPilotCommands(niobot.Module):
     async def pilot(self, ctx: niobot.Context, action: str):
         room_topic = str(ctx.room.topic)
         split_room_topic = room_topic.split("\n")
-        patch_pilots_index = -1
-        for i in range(len(split_room_topic) - 1):
-            if split_room_topic[i].startswith("Patch Pilots: "):
-                patch_pilots_index = i
-                break
+        # patch_pilots_index = -1
+        # for i in range(len(split_room_topic) - 1):
+        #     if split_room_topic[i].startswith("Patch Pilots: "):
+        #         patch_pilots_index = i
+        #         break
 
         if ctx.message.sender in self.blacklist:
             await self.bot.add_reaction(ctx.room, ctx.message, ReactionEmojis.CROSS_MARK.value)
@@ -73,11 +73,11 @@ class PatchPilotCommands(niobot.Module):
                 await self.bot.add_reaction(ctx.room, ctx.message,
                                             ReactionEmojis.CHECK_MARK.value)
 
-                if patch_pilots_index == -1:
-                    await self.bot.add_reaction(ctx.room, ctx.message, ReactionEmojis.BOOM.value)
-                    return
-                else:
-                    pilots = ""
+                # if patch_pilots_index == -1:
+                #     await self.bot.add_reaction(ctx.room, ctx.message, ReactionEmojis.BOOM.value)
+                #     return
+                # else:
+                #     pilots = ""
                 #     if len(self.pilots) == 0:
                 #         split_room_topic[patch_pilots_index] = "Patch Pilots: (none, consider a @pilot in!)"
                 #     else:
@@ -99,10 +99,10 @@ class PatchPilotCommands(niobot.Module):
                 await self.bot.add_reaction(ctx.room, ctx.message,
                                             ReactionEmojis.CHECK_MARK.value)
 
-                if patch_pilots_index == -1:
-                    await self.bot.add_reaction(ctx.room, ctx.message, ReactionEmojis.BOOM.value)
-                    return
-                else:
+                # if patch_pilots_index == -1:
+                #     await self.bot.add_reaction(ctx.room, ctx.message, ReactionEmojis.BOOM.value)
+                #     return
+                # else:
                     pilots = ""
                     # if len(self.pilots) == 0:
                     #     split_room_topic[patch_pilots_index] = "Patch Pilots: (none, consider a @pilot in!)"
@@ -128,21 +128,21 @@ class PatchPilotCommands(niobot.Module):
         room_topic = str(ctx.room.topic)
         split_room_topic = room_topic.split("\n")
         patch_pilots_index = -1
-        for i in range(len(split_room_topic) - 1):
-            if split_room_topic[i].startswith("Patch Pilots: "):
-                patch_pilots_index = i
-                break
+        # for i in range(len(split_room_topic) - 1):
+        #     if split_room_topic[i].startswith("Patch Pilots: "):
+        #         patch_pilots_index = i
+        #         break
 
         self.pilots = []
 
-        if patch_pilots_index == -1:
-            pass
-        else:
-            split_room_topic[patch_pilots_index] = "Patch Pilots: (none, consider a @pilot in!)"
-            try:
-                await self.bot.update_room_topic(ctx.room.room_id, "\n".join(split_room_topic))
-            except Exception as e:
-                traceback.print_exception(e)
+        # if patch_pilots_index == -1:
+        #     pass
+        # else:
+        #     split_room_topic[patch_pilots_index] = "Patch Pilots: (none, consider a @pilot in!)"
+        #     try:
+        #         await self.bot.update_room_topic(ctx.room.room_id, "\n".join(split_room_topic))
+        #     except Exception as e:
+        #         traceback.print_exception(e)
 
         await self.write()
         # self.load_authorized()

@@ -123,7 +123,6 @@ class PatchPilotCommands(niobot.Module):
         self.pilots = []
 
         await self.write()
-        await self.reload_acl()
         await self.bot.add_reaction(ctx.room, ctx.message, ReactionEmojis.BOOM.value)
 
     @niobot.command(name="pilots",

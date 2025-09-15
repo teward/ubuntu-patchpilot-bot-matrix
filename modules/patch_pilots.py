@@ -117,7 +117,8 @@ class PatchPilotCommands(niobot.Module):
 
     @niobot.command(name="reload_acl", description="(Authorized Only) Refreshes the list of Matrix IDs who can "
                                                    "use the commands.")
+    @is_poweruser()
     async def reload_acl(self, ctx: niobot.Context):
         self.load_authorized()
-        await self.bot.add_reaction(ctx.room, ctx.message, ReactionEmojis.CHECK_MARK.value())
+        # await self.bot.add_reaction(ctx.room, ctx.message, ReactionEmojis.CHECK_MARK.value())
 

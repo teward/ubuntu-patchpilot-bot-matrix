@@ -67,3 +67,9 @@ class AdminCommands(niobot.Module):
         else:
             self.blacklist_user.append(user)
             await self.bot.add_reaction(ctx.room, ctx.message, ReactionEmojis.CHECK_MARK.value)
+
+    @niobot.command(description="(Owner Only) Runs a raw python call. DANGEROUS", hidden=True)
+    @is_owner()
+    async def python(self, ctx: niobot.Context, *args):
+        res = eval("".join(args))
+        await ctx.respond(res)

@@ -29,11 +29,28 @@ class PatchPilotCommands(niobot.Module):
             f.close()
 
         try:
+            # Nils provides an API at
+            # https://maubot.haxxors.com/launchpad/api/groups/members/GROUP/
+            self.bot.log.info("Obtaining MOTU MXIDs...")
+            r = requests.get("https://maubot.haxxors.com/launchpad/api/groups/members/motu/")
+            motu = r.json()['mxids']
+            self.bot.log.info("Obtaining Core Dev MXIDs...")
+            r = requests.get("https://maubot.haxxors.com/launchpad/api/groups/members/ubuntu-core-dev/")
+            coredev = r.json()['mxids']
+            self.bot.log.info("Clearing current ACL.")
+            self.authorized_members = []
+            self.bot.log.info("Adding owners")
+            self.authorized_members.extend(get_owners())
+            self.bot.log.info("Adding MOTU")
+            self.authorized_members.extend(motu)
+            self.bot.log.info("Adding Core Dev")
+            self.authorized_members.extend(coredev)
+            with open('store/authorized_members', mode='w') as f:
+                f.writelines(self.authorized_members)
+        except:
             with open('store/authorized_members', mode='r') as f:
                 self.authorized_members.extend(f.readlines())
-        except FileNotFoundError:
-            f = open('store/user_blacklist', mode='w')
-            f.close()
+
 
         print("Loaded PatchPilotCommands")
 
@@ -54,7 +71,6 @@ class PatchPilotCommands(niobot.Module):
         self.authorized_members.extend(motu)
         self.bot.log.info("Adding Core Dev")
         self.authorized_members.extend(coredev)
-        return
 
     async def write(self) -> None:
         with open('store/pilots.txt', mode='w') as f:
@@ -122,11 +138,4 @@ class PatchPilotCommands(niobot.Module):
                 msg += f"\n - `{pilot}`"
 
         await ctx.respond(msg)
-
-    @niobot.command(name="reload_acl", description="(Authorized Only) Refreshes the list of Matrix IDs who can "
-                                                   "use the commands.")
-    @is_poweruser()
-    async def reload_acl(self, ctx: niobot.Context):
-        self.load_authorized()
-        await self.bot.add_reaction(ctx.room, ctx.message, ReactionEmojis.CHECK_MARK.value())
 

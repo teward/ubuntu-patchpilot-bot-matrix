@@ -40,13 +40,21 @@ class PatchPilotCommands(niobot.Module):
     def load_authorized(self) -> None:
         # Nils provides an API at
         # https://maubot.haxxors.com/launchpad/api/groups/members/GROUP/
+        self.bot.log.info("Obtaining MOTU MXIDs...")
         r = requests.get("https://maubot.haxxors.com/launchpad/api/groups/members/motu/")
         motu = r.json()['mxids']
+        self.bot.log.info("Obtaining Core Dev MXIDs...")
         r = requests.get("https://maubot.haxxors.com/launchpad/api/groups/members/ubuntu-core-dev/")
         coredev = r.json()['mxids']
+        self.bot.log.info("Clearing current ACL.")
+        self.authorized_members = []
+        self.bot.log.info("Adding owners")
         self.authorized_members.extend(get_owners())
+        self.bot.log.info("Adding MOTU")
         self.authorized_members.extend(motu)
+        self.bot.log.info("Adding Core Dev")
         self.authorized_members.extend(coredev)
+        return
 
     async def write(self) -> None:
         with open('store/pilots.txt', mode='w') as f:
@@ -120,5 +128,5 @@ class PatchPilotCommands(niobot.Module):
     @is_poweruser()
     async def reload_acl(self, ctx: niobot.Context):
         self.load_authorized()
-        # await self.bot.add_reaction(ctx.room, ctx.message, ReactionEmojis.CHECK_MARK.value())
+        await self.bot.add_reaction(ctx.room, ctx.message, ReactionEmojis.CHECK_MARK.value())
 

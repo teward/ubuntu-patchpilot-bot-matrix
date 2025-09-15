@@ -28,6 +28,13 @@ class PatchPilotCommands(niobot.Module):
             f = open('store/user_blacklist', mode='w')
             f.close()
 
+        try:
+            with open('store/authorized_members', mode='r') as f:
+                self.authorized_members.extend(f.readlines())
+        except FileNotFoundError:
+            f = open('store/user_blacklist', mode='w')
+            f.close()
+
         print("Loaded PatchPilotCommands")
 
     def load_authorized(self) -> None:
@@ -37,18 +44,17 @@ class PatchPilotCommands(niobot.Module):
         motu = r.json()['mxids']
         r = requests.get("https://maubot.haxxors.com/launchpad/api/groups/members/ubuntu-core-dev/")
         coredev = r.json()['mxids']
-        self.authorized_members = []
         self.authorized_members.extend(get_owners())
         self.authorized_members.extend(motu)
         self.authorized_members.extend(coredev)
-        with open('store/authorized_users', mode='w') as f:
-            f.writelines([f"{member}\n" for member in self.authorized_members])
 
     async def write(self) -> None:
         with open('store/pilots.txt', mode='w') as f:
             f.writelines([f"{pilot}\n" for pilot in self.pilots])
         with open('store/user_blacklist', mode='w') as f:
             f.writelines([f"{user}\n" for user in self.blacklist])
+        with open('store/authorized_members', mode='w') as f:
+            f.writelines([f"{user}\n" for user in self.authorized_members])
 
     @niobot.command(description="Allows a patch pilot to show themselves as in or out")
     async def pilot(self, ctx: niobot.Context, action: str):

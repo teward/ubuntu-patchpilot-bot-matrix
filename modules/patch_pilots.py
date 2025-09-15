@@ -1,7 +1,7 @@
 import traceback
 
 import niobot
-
+from _lib.config import get_owners
 import requests
 
 from _lib.decorators import is_owner, is_poweruser
@@ -38,7 +38,7 @@ class PatchPilotCommands(niobot.Module):
         r = requests.get("https://maubot.haxxors.com/launchpad/api/groups/members/ubuntu-core-dev/")
         coredev = r.json()['mxids']
         self.authorized_members = []
-        self.authorized_members.append(self.bot.owner_id)
+        self.authorized_members.extend(get_owners())
         self.authorized_members.extend(motu)
         self.authorized_members.extend(coredev)
         with open('store/authorized_users', mode='w') as f:
@@ -73,24 +73,6 @@ class PatchPilotCommands(niobot.Module):
                     await self.write()
                     await self.bot.add_reaction(ctx.room, ctx.message,
                                                 ReactionEmojis.CHECK_MARK.value)
-
-                    # if patch_pilots_index == -1:
-                    #     await self.bot.add_reaction(ctx.room, ctx.message, ReactionEmojis.BOOM.value)
-                    #     return
-                    # else:
-                    #     pilots = ""
-                    #     if len(self.pilots) == 0:
-                    #         split_room_topic[patch_pilots_index] = "Patch Pilots: (none, consider a @pilot in!)"
-                    #     else:
-                    #         for pilot in self.pilots:
-                    #             pilots += f"{pilot}, "
-                    #         split_room_topic[patch_pilots_index] = "Patch Pilots: " + pilots.rstrip(', ')
-                    #
-                    # try:
-                    #     await self.bot.update_room_topic(ctx.room.room_id, "\n".join(split_room_topic))
-                    # except Exception as e:
-                    #     traceback.print_exception(e)
-                    #     await self.bot.add_reaction(ctx.room, ctx.message, ReactionEmojis.BOOM.value)
 
                 if action.lower() == "out":
                     if ctx.message.sender in self.pilots:

@@ -3,6 +3,7 @@
 import sys
 import asyncio
 import logging
+import traceback
 
 import niobot
 import yaml
@@ -64,6 +65,7 @@ bot.mount_module("modules.patch_pilots")
 async def on_command_error(ctx: niobot.Context, error: Exception):
     """Called whenever an exception occurs on a command."""
     logger.error(f"Error encountered: {str(error)}", exc_info=error)
+    logger.exception(traceback.format_exc())
     await bot.add_reaction(ctx.room, ctx.message, ReactionEmojis.WARNING.value)
 
 

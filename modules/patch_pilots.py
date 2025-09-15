@@ -4,7 +4,7 @@ import niobot
 
 import requests
 
-from _lib.decorators import is_owner
+from _lib.decorators import is_owner, is_poweruser
 from _lib.enums import ReactionEmojis
 
 
@@ -12,8 +12,8 @@ class PatchPilotCommands(niobot.Module):
     def __init__(self, bot: niobot.NioBot):
         super().__init__(bot)
         self.pilots = []
-        # self.members = []
         self.blacklist = []
+        self.authorized_members = []
         try:
             with open('store/pilots.txt', mode='r') as f:
                 self.pilots.extend(f.readlines())
@@ -28,15 +28,21 @@ class PatchPilotCommands(niobot.Module):
             f = open('store/user_blacklist', mode='w')
             f.close()
 
-        # self.load_authorized()
         print("Loaded PatchPilotCommands")
 
-    # def load_authorized(self) -> None:
-    #     # Nils provides an API at
-    #     # https://maubot.haxxors.com/launchpad/api/groups/members/ubuntumembers/
-    #     r = requests.get("https://maubot.haxxors.com/launchpad/api/groups/members/ubuntumembers/")
-    #     ubuntu_members = r.json()['mxids']
-    #     self.members = get_authorized(ubuntu_members)
+    def load_authorized(self) -> None:
+        # Nils provides an API at
+        # https://maubot.haxxors.com/launchpad/api/groups/members/GROUP/
+        r = requests.get("https://maubot.haxxors.com/launchpad/api/groups/members/motu/")
+        motu = r.json()['mxids']
+        r = requests.get("https://maubot.haxxors.com/launchpad/api/groups/members/ubuntu-core-dev/")
+        coredev = r.json()['mxids']
+        self.authorized_members = []
+        self.authorized_members.append(self.bot.owner_id)
+        self.authorized_members.extend(motu)
+        self.authorized_members.extend(coredev)
+        with open('store/authorized_users', mode='w') as f:
+            f.writelines([f"{member}\n" for member in self.authorized_members])
 
     async def write(self) -> None:
         with open('store/pilots.txt', mode='w') as f:
@@ -54,68 +60,45 @@ class PatchPilotCommands(niobot.Module):
         #         patch_pilots_index = i
         #         break
 
-        if ctx.message.sender in self.blacklist:
+        if ctx.message.sender not in self.authorized_members:
             await self.bot.add_reaction(ctx.room, ctx.message, ReactionEmojis.CROSS_MARK.value)
             return
-
-        # if ctx.message.sender.split(":")[1].lower() not in ['ubuntu.com', 'darkchaos.dev', 'matrix.debian.social']:
-        #     self.bot.log.info("COMMAND 'PILOT' CALLED BY DISALLOWED USER!")
-        #     await self.bot.add_reaction(ctx.room, ctx.message, ReactionEmojis.CROSS_MARK.value)
-        #     return
-
-        if action.lower() not in ["in", "out"]:
-            await self.bot.add_reaction(ctx.room, ctx.message,
-                                        ReactionEmojis.QUESTION_MARK.value)
         else:
-            if action.lower() == "in":
-                self.pilots.append(ctx.message.sender)
-                await self.write()
+            if action.lower() not in ["in", "out"]:
                 await self.bot.add_reaction(ctx.room, ctx.message,
-                                            ReactionEmojis.CHECK_MARK.value)
-
-                # if patch_pilots_index == -1:
-                #     await self.bot.add_reaction(ctx.room, ctx.message, ReactionEmojis.BOOM.value)
-                #     return
-                # else:
-                #     pilots = ""
-                #     if len(self.pilots) == 0:
-                #         split_room_topic[patch_pilots_index] = "Patch Pilots: (none, consider a @pilot in!)"
-                #     else:
-                #         for pilot in self.pilots:
-                #             pilots += f"{pilot}, "
-                #         split_room_topic[patch_pilots_index] = "Patch Pilots: " + pilots.rstrip(', ')
-                #
-                # try:
-                #     await self.bot.update_room_topic(ctx.room.room_id, "\n".join(split_room_topic))
-                # except Exception as e:
-                #     traceback.print_exception(e)
-                #     await self.bot.add_reaction(ctx.room, ctx.message, ReactionEmojis.BOOM.value)
-
-            if action.lower() == "out":
-                if ctx.message.sender in self.pilots:
-                    self.pilots.remove(ctx.message.sender)
+                                            ReactionEmojis.QUESTION_MARK.value)
+            else:
+                if action.lower() == "in":
+                    self.pilots.append(ctx.message.sender)
                     await self.write()
+                    await self.bot.add_reaction(ctx.room, ctx.message,
+                                                ReactionEmojis.CHECK_MARK.value)
 
-                await self.bot.add_reaction(ctx.room, ctx.message,
-                                            ReactionEmojis.CHECK_MARK.value)
-
-                # if patch_pilots_index == -1:
-                #     await self.bot.add_reaction(ctx.room, ctx.message, ReactionEmojis.BOOM.value)
-                #     return
-                # else:
-                    pilots = ""
-                    # if len(self.pilots) == 0:
-                    #     split_room_topic[patch_pilots_index] = "Patch Pilots: (none, consider a @pilot in!)"
+                    # if patch_pilots_index == -1:
+                    #     await self.bot.add_reaction(ctx.room, ctx.message, ReactionEmojis.BOOM.value)
+                    #     return
                     # else:
-                    #     for pilot in self.pilots:
-                    #         pilots += f"{pilot}, "
-                    #     split_room_topic[patch_pilots_index] = "Patch Pilots: " + pilots.rstrip(', ')
+                    #     pilots = ""
+                    #     if len(self.pilots) == 0:
+                    #         split_room_topic[patch_pilots_index] = "Patch Pilots: (none, consider a @pilot in!)"
+                    #     else:
+                    #         for pilot in self.pilots:
+                    #             pilots += f"{pilot}, "
+                    #         split_room_topic[patch_pilots_index] = "Patch Pilots: " + pilots.rstrip(', ')
+                    #
+                    # try:
+                    #     await self.bot.update_room_topic(ctx.room.room_id, "\n".join(split_room_topic))
+                    # except Exception as e:
+                    #     traceback.print_exception(e)
+                    #     await self.bot.add_reaction(ctx.room, ctx.message, ReactionEmojis.BOOM.value)
 
-                # try:
-                #     await self.bot.update_room_topic(ctx.room.room_id, "\n".join(split_room_topic))
-                # except Exception as e:
-                #     traceback.print_exception(e)
-                #     await self.bot.add_reaction(ctx.room, ctx.message, ReactionEmojis.BOOM.value)
+                if action.lower() == "out":
+                    if ctx.message.sender in self.pilots:
+                        self.pilots.remove(ctx.message.sender)
+                        await self.write()
+
+                    await self.bot.add_reaction(ctx.room, ctx.message,
+                                                ReactionEmojis.CHECK_MARK.value)
 
 
 
@@ -123,29 +106,12 @@ class PatchPilotCommands(niobot.Module):
                                 "active patch pilots list to empty. Also triggers a refresh of "
                                 "the authorized users list.",
                     hidden=True)
-    @is_owner()
+    @is_poweruser()
     async def reset_pilots(self, ctx: niobot.Context):
-        room_topic = str(ctx.room.topic)
-        split_room_topic = room_topic.split("\n")
-        patch_pilots_index = -1
-        # for i in range(len(split_room_topic) - 1):
-        #     if split_room_topic[i].startswith("Patch Pilots: "):
-        #         patch_pilots_index = i
-        #         break
-
         self.pilots = []
 
-        # if patch_pilots_index == -1:
-        #     pass
-        # else:
-        #     split_room_topic[patch_pilots_index] = "Patch Pilots: (none, consider a @pilot in!)"
-        #     try:
-        #         await self.bot.update_room_topic(ctx.room.room_id, "\n".join(split_room_topic))
-        #     except Exception as e:
-        #         traceback.print_exception(e)
-
         await self.write()
-        # self.load_authorized()
+        await self.reload_acl()
         await self.bot.add_reaction(ctx.room, ctx.message, ReactionEmojis.BOOM.value)
 
     @niobot.command(name="pilots",
@@ -161,44 +127,9 @@ class PatchPilotCommands(niobot.Module):
 
         await ctx.respond(msg)
 
-    # @niobot.command(name="reload_members",
-    #                 description="(Authorized Only) Refreshes the list of ~ubuntumembers matrix IDs "
-    #                             "and adds them to the Authorized list for patch pilot commands.")
-    # async def refresh_authorized(self, ctx: niobot.Context):
-    #     self.load_authorized()
-    #     await self.bot.add_reaction(ctx.room, ctx.message, ReactionEmojis.CHECK_MARK.value())
+    @niobot.command(name="reload_acl", description="(Authorized Only) Refreshes the list of Matrix IDs who can "
+                                                   "use the commands.")
+    async def reload_acl(self, ctx: niobot.Context):
+        self.load_authorized()
+        await self.bot.add_reaction(ctx.room, ctx.message, ReactionEmojis.CHECK_MARK.value())
 
-    # @niobot.command(name="list_members",
-    #                 description="(Owner Only) Dumps the list of current authorized matrix IDs")
-    # async def list_members(self, ctx: niobot.Context):
-    #     msg = "List of patch pilot authorized matrix IDs:"
-    #     if not self.members:
-    #         msg += " (None)"
-    #     else:
-    #         msg += "\n"
-    #         for mxid in self.members:
-    #             msg += f" - `{mxid}`\n"
-    #     await ctx.respond(msg.rstrip('\r\n'))
-
-    # @niobot.command(name="isauthorized",
-    #                 description="Allows any user to check if they are allowed to use patch pilot "
-    #                             "commands. If they specify a user ID and are already authorized, "
-    #                             "it will check that user ID.")
-    # async def is_authorized(self, ctx: niobot.Context, uid: str = None):
-    #     if uid and not uid.startswith('@'):
-    #         uid = f"@{uid}"
-    #
-    #     if ctx.message.sender in self.members and uid:
-    #         if uid in self.members:
-    #             await ctx.respond(f"User `{uid}` is allowed to use patch pilot commands.",
-    #                               message_type="m.notice")
-    #         else:
-    #             await ctx.respond(f"User `{uid}` is not allowed to use patch pilot "
-    #                               f"commands.", message_type="m.notice")
-    #     else:
-    #         if ctx.message.sender in self.members:
-    #             await ctx.respond("You are allowed to use patch pilot commands.",
-    #                               message_type="m.notice")
-    #         else:
-    #             await ctx.respond("You are not allowed to use patch pilot commands.",
-    #                               message_type="m.notice")

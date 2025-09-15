@@ -24,6 +24,15 @@ def is_owner() -> Any:
     return niobot.check(predicate)
 
 
+def is_poweruser() -> Any:
+    def predicate(ctx:niobot.Context):
+        if ctx.message.sender in get_owners():
+            return True
+        else:
+            return ctx.room.power_levels.get_user_level(ctx.message.sender) >= 50
+
+    return niobot.check(predicate)
+
 # def is_authorized(additional_ids: list = None) -> Any:
 #     """
 #     This decorator is an extension of `is_owner` in that we specifically only let a set of

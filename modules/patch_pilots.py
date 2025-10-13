@@ -28,57 +28,57 @@ class PatchPilotCommands(niobot.Module):
             f = open('store/user_blacklist', mode='w')
             f.close()
 
-        try:
-            # Nils provides an API at
-            # https://maubot.haxxors.com/launchpad/api/groups/members/GROUP/
-            self.bot.log.info("Obtaining MOTU MXIDs...")
-            r = requests.get("https://maubot.haxxors.com/launchpad/api/groups/members/motu/")
-            motu = r.json()['mxids']
-            self.bot.log.info("Obtaining Core Dev MXIDs...")
-            r = requests.get("https://maubot.haxxors.com/launchpad/api/groups/members/ubuntu-core-dev/")
-            coredev = r.json()['mxids']
-            self.bot.log.info("Clearing current ACL.")
-            self.authorized_members = []
-            self.bot.log.info("Adding owners")
-            self.authorized_members.extend(get_owners())
-            self.bot.log.info("Adding MOTU")
-            self.authorized_members.extend(motu)
-            self.bot.log.info("Adding Core Dev")
-            self.authorized_members.extend(coredev)
-            with open('store/authorized_members', mode='w') as f:
-                f.writelines(self.authorized_members)
-        except:
-            with open('store/authorized_members', mode='r') as f:
-                self.authorized_members.extend(f.readlines())
+        # try:
+        #     # Nils provides an API at
+        #     # https://maubot.haxxors.com/launchpad/api/groups/members/GROUP/
+        #     self.bot.log.info("Obtaining MOTU MXIDs...")
+        #     r = requests.get("https://maubot.haxxors.com/launchpad/api/groups/members/motu/")
+        #     motu = r.json()['mxids']
+        #     self.bot.log.info("Obtaining Core Dev MXIDs...")
+        #     r = requests.get("https://maubot.haxxors.com/launchpad/api/groups/members/ubuntu-core-dev/")
+        #     coredev = r.json()['mxids']
+        #     self.bot.log.info("Clearing current ACL.")
+        #     self.authorized_members = []
+        #     self.bot.log.info("Adding owners")
+        #     self.authorized_members.extend(get_owners())
+        #     self.bot.log.info("Adding MOTU")
+        #     self.authorized_members.extend(motu)
+        #     self.bot.log.info("Adding Core Dev")
+        #     self.authorized_members.extend(coredev)
+        #     with open('store/authorized_members', mode='w') as f:
+        #         f.writelines(self.authorized_members)
+        # except:
+        #     with open('store/authorized_members', mode='r') as f:
+        #         self.authorized_members.extend(f.readlines())
 
 
         print("Loaded PatchPilotCommands")
 
-    def load_authorized(self) -> None:
-        # Nils provides an API at
-        # https://maubot.haxxors.com/launchpad/api/groups/members/GROUP/
-        self.bot.log.info("Obtaining MOTU MXIDs...")
-        r = requests.get("https://maubot.haxxors.com/launchpad/api/groups/members/motu/")
-        motu = r.json()['mxids']
-        self.bot.log.info("Obtaining Core Dev MXIDs...")
-        r = requests.get("https://maubot.haxxors.com/launchpad/api/groups/members/ubuntu-core-dev/")
-        coredev = r.json()['mxids']
-        self.bot.log.info("Clearing current ACL.")
-        self.authorized_members = []
-        self.bot.log.info("Adding owners")
-        self.authorized_members.extend(get_owners())
-        self.bot.log.info("Adding MOTU")
-        self.authorized_members.extend(motu)
-        self.bot.log.info("Adding Core Dev")
-        self.authorized_members.extend(coredev)
+    # def load_authorized(self) -> None:
+    #     # Nils provides an API at
+    #     # https://maubot.haxxors.com/launchpad/api/groups/members/GROUP/
+    #     self.bot.log.info("Obtaining MOTU MXIDs...")
+    #     r = requests.get("https://maubot.haxxors.com/launchpad/api/groups/members/motu/")
+    #     motu = r.json()['mxids']
+    #     self.bot.log.info("Obtaining Core Dev MXIDs...")
+    #     r = requests.get("https://maubot.haxxors.com/launchpad/api/groups/members/ubuntu-core-dev/")
+    #     coredev = r.json()['mxids']
+    #     self.bot.log.info("Clearing current ACL.")
+    #     self.authorized_members = []
+    #     self.bot.log.info("Adding owners")
+    #     self.authorized_members.extend(get_owners())
+    #     self.bot.log.info("Adding MOTU")
+    #     self.authorized_members.extend(motu)
+    #     self.bot.log.info("Adding Core Dev")
+    #     self.authorized_members.extend(coredev)
 
     async def write(self) -> None:
         with open('store/pilots.txt', mode='w') as f:
             f.writelines([f"{pilot}\n" for pilot in self.pilots])
         with open('store/user_blacklist', mode='w') as f:
             f.writelines([f"{user}\n" for user in self.blacklist])
-        with open('store/authorized_members', mode='w') as f:
-            f.writelines([f"{user}\n" for user in self.authorized_members])
+        # with open('store/authorized_members', mode='w') as f:
+        #     f.writelines([f"{user}\n" for user in self.authorized_members])
 
     @niobot.command(description="Allows a patch pilot to show themselves as in or out")
     async def pilot(self, ctx: niobot.Context, action: str):
@@ -90,27 +90,23 @@ class PatchPilotCommands(niobot.Module):
         #         patch_pilots_index = i
         #         break
 
-        if ctx.message.sender not in self.authorized_members:
-            await self.bot.add_reaction(ctx.room, ctx.message, ReactionEmojis.CROSS_MARK.value)
-            return
+        if action.lower() not in ["in", "out"]:
+            await self.bot.add_reaction(ctx.room, ctx.message,
+                                        ReactionEmojis.QUESTION_MARK.value)
         else:
-            if action.lower() not in ["in", "out"]:
+            if action.lower() == "in":
+                self.pilots.append(ctx.message.sender)
+                await self.write()
                 await self.bot.add_reaction(ctx.room, ctx.message,
-                                            ReactionEmojis.QUESTION_MARK.value)
-            else:
-                if action.lower() == "in":
-                    self.pilots.append(ctx.message.sender)
+                                            ReactionEmojis.CHECK_MARK.value)
+
+            if action.lower() == "out":
+                if ctx.message.sender in self.pilots:
+                    self.pilots.remove(ctx.message.sender)
                     await self.write()
-                    await self.bot.add_reaction(ctx.room, ctx.message,
-                                                ReactionEmojis.CHECK_MARK.value)
 
-                if action.lower() == "out":
-                    if ctx.message.sender in self.pilots:
-                        self.pilots.remove(ctx.message.sender)
-                        await self.write()
-
-                    await self.bot.add_reaction(ctx.room, ctx.message,
-                                                ReactionEmojis.CHECK_MARK.value)
+                await self.bot.add_reaction(ctx.room, ctx.message,
+                                            ReactionEmojis.CHECK_MARK.value)
 
 
 
